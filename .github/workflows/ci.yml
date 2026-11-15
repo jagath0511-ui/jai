@@ -1,0 +1,75 @@
+name: CI & Wheel Build
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build-and-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install build and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build wheel pytest
+
+      - name: Compile C Sandbox Library (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Write-Host "Compiling native/jai_sandbox.c for Windows..."
+          if (Test-Path "native/build.ps1") {
+            & ./native/build.ps1 -OutputDll "src/security/jai_sandbox.dll"
+            Copy-Item "src/security/jai_sandbox.dll" "native/jai_sandbox.dll" -Force
+          } else {
+            gcc -std=c99 -shared -O3 -Wall -Wextra -Werror -o src/security/jai_sandbox.dll native/jai_sandbox.c -ladvapi32
+            Copy-Item "src/security/jai_sandbox.dll" "native/jai_sandbox.dll" -Force
+          }
+          if (-not (Test-Path "src/security/jai_sandbox.dll")) {
+            throw "Failed to generate src/security/jai_sandbox.dll"
+          }
+          Write-Host "Successfully generated src/security/jai_sandbox.dll"
+
+      - name: Compile C Sandbox Library (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          echo "Compiling native/jai_sandbox.c for Linux..."
+          mkdir -p src/security native
+          gcc -std=gnu99 -shared -fPIC -O3 -Wall -Wextra -Werror -o src/security/libjai_sandbox.so native/jai_sandbox.c
+          cp src/security/libjai_sandbox.so native/libjai_sandbox.so
+          if [ ! -f "src/security/libjai_sandbox.so" ]; then
+            echo "Failed to generate src/security/libjai_sandbox.so" && exit 1
+          fi
+          echo "Successfully generated src/security/libjai_sandbox.so"
+
+      - name: Build Wheel
+        run: |
+          python -m build --wheel
+
+      - name: Verify Wheel Contents
+        shell: bash
+        run: |
+          pip install dist/*.whl
+          python -c "import logging; logging.basicConfig(level=logging.INFO); from src.security.os_sandbox import _LOADED_LIB_PATH; print('Loaded C sandbox library:', _LOADED_LIB_PATH); assert _LOADED_LIB_PATH is not None, 'C sandbox library failed to package into wheel'"
+
+      - name: Upload Wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ runner.os }}-py${{ matrix.python-version }}
+          path: dist/*.whl

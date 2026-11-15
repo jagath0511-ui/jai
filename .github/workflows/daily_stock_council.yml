@@ -1,0 +1,41 @@
+name: Daily Stock Council & Telegram Dispatch
+
+on:
+  schedule:
+    # Runs Monday to Friday at 21:00 IST (15:30 UTC), right after market close
+    - cron: '30 15 * * 1-5'
+  workflow_dispatch: # Allows manual one-click trigger anytime from GitHub
+
+jobs:
+  run-council:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install yfinance requests python-dotenv
+
+      - name: Execute Daily Council & Send Telegram Alert
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_DEFAULT_CHAT_ID: ${{ secrets.TELEGRAM_DEFAULT_CHAT_ID }}
+        run: |
+          python src/daily_stock_council_engine.py
+
+      - name: Commit and Push Daily Reports to Vault
+        run: |
+          git config --global user.name 'JAI Council Bot'
+          git config --global user.email 'jai-bot@users.noreply.github.com'
+          git add vault/
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore(council): automated daily stock dossier [skip ci]" && git push)

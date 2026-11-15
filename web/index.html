@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JAI Studio - Executive AI Operations & Director Dashboard</title>
+  <meta name="description" content="JAI Executive AI Operations Dashboard: Memory Vault Live Explorer, Video Studio Bridge, LLM Router Monitor, and Voice Console.">
+  <link rel="stylesheet" href="css/studio.css">
+</head>
+<body>
+
+  <!-- ========================================================================
+       Studio Header
+       ======================================================================== -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="#" class="brand">
+        <div class="brand-icon">J</div>
+        <div>
+          <h1 class="brand-title">JAI <span class="brand-badge">Executive Studio</span></h1>
+        </div>
+      </a>
+
+      <!-- DaVinci Resolve Style Workspaces Navigation -->
+      <nav class="app-nav-tabs" id="appNavTabs">
+        <button class="nav-tab active" data-view="viewSystemOverview" id="tabSystemOverview">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>System Overview</span>
+        </button>
+
+        <button class="nav-tab" data-view="viewMemoryVault" id="tabMemoryVault">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+          <span>Memory Vault</span>
+        </button>
+
+        <button class="nav-tab" data-view="viewVideoStudio" id="tabVideoStudio">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+          </svg>
+          <span>Video Studio Bridge</span>
+        </button>
+
+        <button class="nav-tab" data-view="viewVoiceConsole" id="tabVoiceConsole">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+          <span>Voice &amp; Daemon</span>
+        </button>
+      </nav>
+
+      <!-- Header Status Indicators & Quick Actions -->
+      <div class="header-actions">
+        <div class="status-badge" id="backendBadge" title="Backend API HTTP/SSE Status">
+          <span class="status-dot online" id="backendDot"></span>
+          <span id="backendText">API: Online</span>
+        </div>
+
+        <div class="status-badge" id="vaultBadge" title="SQLite FTS5 BM25 Memory Vault Status">
+          <span class="status-dot online" id="vaultDot"></span>
+          <span id="vaultText">Vault: Ready</span>
+        </div>
+
+        <div class="status-badge" id="googleBadge" title="Google Workspace Sync Status">
+          <span class="status-dot online" id="googleDot"></span>
+          <span id="googleText">Google: Synced</span>
+        </div>
+
+        <div class="status-badge" id="videoBadge" title="Video Engine & ClipMerge Status">
+          <span class="status-dot online" id="videoDot"></span>
+          <span id="videoText">Video: Ready</span>
+        </div>
+
+        <button class="btn btn-sm btn-primary" id="btnOpenQuickNoteModal" title="Quick Memory Capture">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>+ Quick Note</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       Main Application Container
+       ======================================================================== -->
+  <main class="main-content">
+
+    <!-- ----------------------------------------------------------------------
+         WORKSPACE 1: SYSTEM OVERVIEW
+         ---------------------------------------------------------------------- -->
+    <section class="workspace-view active" id="viewSystemOverview">
+      <div class="view-header">
+        <div class="view-title-group">
+          <h2>Executive System Overview</h2>
+          <p>Real-time telemetry, Google Workspace sync health, and LLM 3-Tier router diagnostics.</p>
+        </div>
+        <button class="btn btn-sm btn-secondary" id="btnRefreshSystemOverview">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          <span>Refresh Telemetry</span>
+        </button>
+      </div>
+
+      <!-- Top Metric Cards -->
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-label">Total Memories Vaulted</div>
+          <div class="stat-value" id="statTotalMemories">--</div>
+          <div class="stat-meta">
+            <span id="statActiveMemories">-- active</span> &bull; 
+            <span id="statDeletedMemories">-- soft-deleted</span>
+          </div>
+        </div>
+
+        <div class="stat-box cyan">
+          <div class="stat-label">Client Vault Scopes</div>
+          <div class="stat-value" id="statClientScopes">--</div>
+          <div class="stat-meta">Isolated directories in <code>vault/clients/</code></div>
+        </div>
+
+        <div class="stat-box emerald">
+          <div class="stat-label">Router Fast-Path Latency</div>
+          <div class="stat-value" id="statFastLatency">-- ms</div>
+          <div class="stat-meta">Gemini 3.8 Flash (target: &lt;200ms)</div>
+        </div>
+
+        <div class="stat-box indigo">
+          <div class="stat-label">Worker Priority Queue</div>
+          <div class="stat-value" id="statQueueDepth">0</div>
+          <div class="stat-meta">Priority 1 (Voice) &bull; Priority 2 (Batch)</div>
+        </div>
+      </div>
+
+      <!-- Dashboard Cards Grid -->
+      <div class="dashboard-grid">
+
+        <!-- Service Connectivity Matrix -->
+        <div class="card col-6">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              </svg>
+              <span>Service Integration Matrix</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="service-matrix">
+              <div class="service-card">
+                <div class="service-info">
+                  <h4>Google Workspace Sync</h4>
+                  <span id="svcGoogleDesc">Gmail, Calendar, Drive Read-Only</span>
+                </div>
+                <span class="status-dot online" id="svcGoogleDot" title="Google Services Connected"></span>
+              </div>
+
+              <div class="service-card">
+                <div class="service-info">
+                  <h4>Telegram Transport</h4>
+                  <span id="svcTelegramDesc">Bidirectional Bridge &amp; Outbound Queue</span>
+                </div>
+                <span class="status-dot online" id="svcTelegramDot" title="Telegram Bridge Active"></span>
+              </div>
+
+              <div class="service-card">
+                <div class="service-info">
+                  <h4>Speech Worker Daemon</h4>
+                  <span id="svcDaemonDesc">faster-whisper int8 (Named Pipe)</span>
+                </div>
+                <span class="status-dot online" id="svcDaemonDot" title="Worker Daemon Connected"></span>
+              </div>
+
+              <div class="service-card">
+                <div class="service-info">
+                  <h4>SQLite FTS5 Vault</h4>
+                  <span id="svcVaultDesc">BM25 Ranking &amp; Porter Stemmer</span>
+                </div>
+                <span class="status-dot online" id="svcVaultDot" title="SQLite Memory DB Ready"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LLM 3-Tier Router Breakdown -->
+        <div class="card col-6">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+              </svg>
+              <span>LLM 3-Tier Priority Router Status</span>
+            </div>
+            <span class="badge-scope" id="routerActiveTier">Gemini 3.8 Flash Tier 1</span>
+          </div>
+          <div class="card-body">
+            <div class="tier-breakdown">
+              <div class="tier-row">
+                <div class="tier-row-header">
+                  <span>Tier 1: Gemini 3.8 Flash (Fast-path &lt;2s)</span>
+                  <span id="tierGeminiLatency">~50ms &bull; 95%</span>
+                </div>
+                <div class="tier-bar-bg">
+                  <div class="tier-bar-fill tier-gemini" id="tierGeminiBar" style="width: 95%;"></div>
+                </div>
+              </div>
+
+              <div class="tier-row">
+                <div class="tier-row-header">
+                  <span>Tier 2: Groq Llama 3.3 70B (Failover Only)</span>
+                  <span id="tierGroqLatency">Idle &bull; 4%</span>
+                </div>
+                <div class="tier-bar-bg">
+                  <div class="tier-bar-fill tier-groq" id="tierGroqBar" style="width: 4%;"></div>
+                </div>
+              </div>
+
+              <div class="tier-row">
+                <div class="tier-row-header">
+                  <span>Tier 3: Ollama Local qwen3:8b (Offline Standby)</span>
+                  <span id="tierOllamaLatency">Ready &bull; 1%</span>
+                </div>
+                <div class="tier-bar-bg">
+                  <div class="tier-bar-fill tier-ollama" id="tierOllamaBar" style="width: 1%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Routing Decisions Log Table -->
+        <div class="card col-12">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="4 17 10 11 4 5"></polyline>
+                <line x1="12" y1="19" x2="20" y2="19"></line>
+              </svg>
+              <span>Recent LLM Decision Log (llm_router.log)</span>
+            </div>
+          </div>
+          <div class="card-body" style="padding: 0;">
+            <div class="log-table-container">
+              <table class="studio-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp (UTC)</th>
+                    <th>Query Type</th>
+                    <th>Tier Selected</th>
+                    <th>Model</th>
+                    <th>Latency</th>
+                    <th>Status</th>
+                    <th>Fallback Reason</th>
+                  </tr>
+                </thead>
+                <tbody id="llmDecisionLogTbody">
+                  <!-- Injected via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ----------------------------------------------------------------------
+         WORKSPACE 2: MEMORY VAULT LIVE EXPLORER
+         ---------------------------------------------------------------------- -->
+    <section class="workspace-view" id="viewMemoryVault">
+      <div class="view-header">
+        <div class="view-title-group">
+          <h2>Memory Vault Live Explorer</h2>
+          <p>Instant FTS5 BM25 search across personal and isolated client vaults with soft-delete controls.</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-sm btn-outline-amber" id="btnToggleDeleted">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            <span id="btnToggleDeletedText">Show Soft-Deleted</span>
+          </button>
+          <button class="btn btn-sm btn-primary" id="btnVaultQuickAdd">
+            <span>+ Add Memory</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search Toolbar & Scopes -->
+      <div class="vault-search-toolbar">
+        <div class="search-input-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" class="search-input" id="vaultSearchInput" placeholder="Search memories with full-text search & BM25 ranking (e.g. video, client, groq, invoice)...">
+          <button class="clear-search-btn" id="btnClearSearch">&times;</button>
+        </div>
+
+        <div class="filter-bar">
+          <!-- Scope Pills -->
+          <div class="scope-pill-group" id="scopePillGroup">
+            <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Scope:</span>
+            <button class="filter-pill active" data-scope="all">All Scopes</button>
+            <button class="filter-pill" data-scope="personal">Personal</button>
+            <!-- Dynamic client scopes appended by JS -->
+          </div>
+
+          <!-- Source Pills -->
+          <div class="source-pill-group" id="sourcePillGroup">
+            <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Source:</span>
+            <button class="filter-pill active" data-source="all">All Sources</button>
+            <button class="filter-pill" data-source="voice">Voice</button>
+            <button class="filter-pill" data-source="telegram">Telegram</button>
+            <button class="filter-pill" data-source="email">Email</button>
+            <button class="filter-pill" data-source="browser_tab">Browser Tab</button>
+            <button class="filter-pill" data-source="manual">Manual</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Memory Card Grid -->
+      <div class="vault-cards-grid" id="vaultCardsGrid">
+        <!-- Injected via vault_explorer.js -->
+      </div>
+    </section>
+
+    <!-- ----------------------------------------------------------------------
+         WORKSPACE 3: VIDEO STUDIO & DIRECTOR BRIDGE
+         ---------------------------------------------------------------------- -->
+    <section class="workspace-view" id="viewVideoStudio">
+      <div class="view-header">
+        <div class="view-title-group">
+          <h2>Video Production Studio &amp; Director Bridge</h2>
+          <p>Native autonomous cloud director renders, Groq AI quality scoring, and Telegram review triggers.</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <a href="http://localhost:8080" target="_blank" class="btn btn-sm btn-secondary" id="btnOpenClipmergeTab">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+            <span>Open ClipMerge Direct</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="studio-layout">
+        <!-- Left: Render Launcher Controls -->
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                <span>Native Render Launcher</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <form id="renderTriggerForm">
+                <div class="form-group">
+                  <label for="renderAspect">Aspect Ratio</label>
+                  <select class="form-select" id="renderAspect">
+                    <option value="16:9" selected>16:9 Widescreen (YouTube, Landscape)</option>
+                    <option value="9:16">9:16 Vertical (Reels, TikTok, Shorts)</option>
+                    <option value="1:1">1:1 Square (Instagram Feed)</option>
+                    <option value="4:5">4:5 Social Portrait</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="renderColor">Color Grade Profile</label>
+                  <select class="form-select" id="renderColor">
+                    <option value="vibrant" selected>Vibrant Studio (Punchy, High Contrast)</option>
+                    <option value="cinematic_warm">Cinematic Warm (Golden Hour 3200K)</option>
+                    <option value="film_noir">Film Noir (Monochrome Depth)</option>
+                    <option value="standard">Natural Flat Rec.709</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="renderUpscale">Lanczos Hardware Upscaling</label>
+                  <select class="form-select" id="renderUpscale">
+                    <option value="1080p" selected>1080p Full HD (Lanczos-3)</option>
+                    <option value="4K">4K UHD Master (Lanczos-3 3840x2160)</option>
+                    <option value="native">Native Match Source</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="renderTransition">Transition Style</label>
+                  <select class="form-select" id="renderTransition">
+                    <option value="fade" selected>Smooth Fade / Dissolve</option>
+                    <option value="crossfade">Audio/Video Crossfade</option>
+                    <option value="wipeleft">Studio Wipe Left</option>
+                    <option value="cut">Direct Hard Cut</option>
+                  </select>
+                </div>
+
+                <div class="form-group checkbox-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="renderSubtitles" checked>
+                    <span>Burn Whisper Styled Subtitles</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="renderDelogo" checked>
+                    <span>Remove Watermarks (Inpaint Delogo)</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="renderVisualsOnly" checked>
+                    <span>Visuals-Only Pure Video Stitch</span>
+                  </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;" id="btnStartRender">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                  <span>Dispatch Studio Render</span>
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Groq Quality Score & Telegram Card -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="8" r="7"></circle>
+                  <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                </svg>
+                <span>Groq AI Quality Audit</span>
+              </div>
+            </div>
+            <div class="card-body score-card">
+              <div class="groq-gauge" id="groqScoreGauge">92</div>
+              <div class="groq-verdict-tag" id="groqVerdictTag">APPROVED</div>
+              <p style="font-size: 0.78rem; color: var(--text-secondary);" id="groqScoreDesc">Audio-visual pacing and color grading pass professional broadcast standards.</p>
+              
+              <button class="btn btn-sm btn-outline-amber" style="width: 100%; margin-top: 0.5rem;" id="btnSendTelegramReview">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+                <span>Dispatch Telegram Review Cut</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Embedded ClipMerge Studio Frame -->
+        <div class="clipmerge-iframe-wrap">
+          <iframe src="http://localhost:8080" class="clipmerge-iframe" id="clipmergeIframe" title="ClipMerge AI Studio Workspace"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <!-- ----------------------------------------------------------------------
+         WORKSPACE 4: VOICE & SPEECH CONSOLE
+         ---------------------------------------------------------------------- -->
+    <section class="workspace-view" id="viewVoiceConsole">
+      <div class="view-header">
+        <div class="view-title-group">
+          <h2>Voice &amp; Speech Daemon Console</h2>
+          <p>Real-time faster-whisper residency, PriorityQueue preemption, and wake-word (JAI) event stream.</p>
+        </div>
+        <div class="status-badge">
+          <span class="status-dot online"></span>
+          <span>Wake Word: "JAI"</span>
+        </div>
+      </div>
+
+      <div class="voice-grid">
+        <!-- Left: Daemon Controls & Hardware Status -->
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                </svg>
+                <span>Interactive Mic Tester</span>
+              </div>
+            </div>
+            <div class="card-body mic-monitor-card">
+              <div class="mic-circle" id="micTriggerBtn" title="Click to test voice input">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" y1="19" x2="12" y2="23"></line>
+                  <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+              </div>
+              <div id="micStatusText" style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">Click to Test Speech Input</div>
+            </div>
+          </div>
+
+          <!-- Daemon Engine Stats -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                  <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                  <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                  <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                </svg>
+                <span>Worker Daemon Residency</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="queue-meter">
+                <div class="queue-item">
+                  <span>Model Architecture</span>
+                  <span style="font-family: var(--font-mono); color: var(--accent-amber);" id="daemonModelName">faster-whisper (small, int8)</span>
+                </div>
+                <div class="queue-item">
+                  <span>Transport Pipe</span>
+                  <span style="font-family: var(--font-mono); color: var(--accent-cyan);">\\.\pipe\jai_worker_pipe</span>
+                </div>
+                <div class="queue-item">
+                  <span>Priority 1 Queue (Interactive)</span>
+                  <span style="font-family: var(--font-mono); color: var(--success);" id="queueP1Count">0 active</span>
+                </div>
+                <div class="queue-item">
+                  <span>Priority 2 Queue (Background)</span>
+                  <span style="font-family: var(--font-mono); color: var(--text-muted);" id="queueP2Count">0 queued</span>
+                </div>
+                <div class="queue-item">
+                  <span>CPU Worker Threads</span>
+                  <span style="font-family: var(--font-mono);">4 Dedicated Cores</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Live Wake-Word Event Feed -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+              <span>Live Wake-Word Ingestion Feed</span>
+            </div>
+            <button class="btn btn-sm btn-secondary" id="btnClearVoiceEvents">Clear Feed</button>
+          </div>
+          <div class="card-body">
+            <div class="event-stream-container" id="voiceEventStream">
+              <!-- Event cards injected by voice_console.js -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       MODAL: QUICK NOTE / MEMORY CREATION
+       ======================================================================== -->
+  <div class="modal-overlay" id="quickNoteModalOverlay">
+    <div class="modal" id="quickNoteModal">
+      <div class="modal-header">
+        <h3>+ Capture Memory Note</h3>
+        <button class="modal-close-btn" id="btnCloseQuickNoteModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="quickNoteForm">
+          <div class="form-group">
+            <label for="quickNoteContent">Note Content</label>
+            <textarea class="form-input" id="quickNoteContent" rows="4" placeholder="Enter memory text, project lead, meeting action, or concept..." required style="resize: vertical;"></textarea>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <div class="form-group">
+              <label for="quickNoteScope">Vault Scope</label>
+              <select class="form-select" id="quickNoteScope">
+                <option value="personal" selected>Personal Vault</option>
+                <!-- Dynamic client vaults populated by JS -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="quickNoteSource">Ingestion Source</label>
+              <select class="form-select" id="quickNoteSource">
+                <option value="manual" selected>Manual Web Entry</option>
+                <option value="voice">Voice Dictation</option>
+                <option value="telegram">Telegram Dispatch</option>
+                <option value="email">Email Extract</option>
+                <option value="browser_tab">Browser Tab Snapshot</option>
+              </select>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCancelQuickNote">Cancel</button>
+        <button class="btn btn-primary" id="btnSaveQuickNote">Save to Vault</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- JavaScript ES Modules (Zero-Build Vanilla) -->
+  <script type="module" src="js/app.js"></script>
+  <script type="module" src="js/vault_explorer.js"></script>
+  <script type="module" src="js/video_studio.js"></script>
+  <script type="module" src="js/voice_console.js"></script>
+</body>
+</html>

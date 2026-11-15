@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jai-runtime"
+version = "0.1.0"
+description = "Autonomous, high-speed, secure browser agent runtime with native sandbox and 3-tier zero-setup browser resolver."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "JAI Team" }
+]
+dependencies = [
+    "playwright>=1.40.0",
+    "pydantic>=2.5.0",
+    "orjson>=3.9.0",
+    "requests>=2.31.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+benchmarks = [
+    "gymnasium>=0.29.0",
+    "browsergym-miniwob>=0.3.0",
+]
+dev = [
+    "pytest>=7.0.0",
+    "build>=1.0.0",
+    "wheel",
+    "pyinstaller>=6.0.0",
+]
+
+[project.scripts]
+jai = "src.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.setuptools.package-data]
+"src.security" = ["*.dll", "*.so"]
+"*" = ["*.dll", "*.so"]

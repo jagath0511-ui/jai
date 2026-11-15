@@ -1,0 +1,89 @@
+# Virtual environment
+.venv/
+venv/
+ENV/
+
+# Environment variables & Google Secrets
+.env
+credentials.json
+token.json
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Database, Staging & Local Data
+data/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Testing
+.pytest_cache/
+
+# AI Models & Binaries (Use Google Drive for 5TB+ model storage, NEVER Git)
+models/
+*.bin
+*.gguf
+*.tar
+*.pt
+*.safetensors
+
+# Generated Media & Workspace Scaffolds
+data/carousels/
+data/drive_backups/
+workspace_repos/
+node_modules/
+dist/
+build/
+*.gz
+*.zip
+
+# Notebooks & Cloud Worker Staging (Contains user credentials/tokens)
+kaggle/
+kaggle_worker/
+cloudflare_worker/
+wrangler.toml
+*.ipynb
+
+# Local Nesting & Agents
+Downloads/
+.agents/
+
+# Benchmark screenshots & recordings (keep summary.json and trajectories, ignore media binaries)
+benchmarks/**/*.png
+benchmarks/**/*.jpg
+benchmarks/**/*.jpeg
+benchmarks/**/*.webp
+benchmarks/**/*.mp4
+benchmarks/**/*.webm
+benchmarks/**/*.gif
+
+# Clean Open-Source Exclusions (keep repository code-only)
+benchmarks/
+tests/
+archive/
+tools/
+vault/
+scratch/
+miniwob-plusplus/
+.wrangler/
+logs/
+*.sqlite
+*.db
+catalan_live
+*.pma
+*.ldb
+*.log
+native/*.dll
+native/*.so
+
+*.env
+*.db-wal
+*.db-shm
+*.pyc
